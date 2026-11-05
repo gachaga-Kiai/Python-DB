@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}{% if record %}Edit Record{% else %}Add Record{% endif %} - Personal Database{% endblock %}
+{% block content %}
+  <div class="page-header">
+    <h1>{% if record %}Edit Record{% else %}Add Record{% endif %}</h1>
+  </div>
+
+  <form class="data-form" method="post" action="{% if record %}{{ url_for('edit', record_id=record.id) }}{% else %}{{ url_for('add') }}{% endif %}">
+    <label>
+      Category
+      <select name="category">
+        {% for c in categories %}
+          <option value="{{ c }}" {% if record and record.category == c %}selected{% endif %}>{{ c }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <label>
+      Name *
+      <input type="text" name="name" required value="{{ record.name if record else '' }}" placeholder="e.g. Jane Smith" />
+    </label>
+
+    <label>
+      Email
+      <input type="email" name="email" value="{{ record.email if record else '' }}" placeholder="e.g. jane@example.com" />
+    </label>
+
+    <label>
+      Phone
+      <input type="text" name="phone" value="{{ record.phone if record else '' }}" placeholder="e.g. +1 555 0100" />
+    </label>
+
+    <label>
+      Notes
+      <textarea name="notes" rows="5" placeholder="Any extra details to keep securely...">{{ record.notes if record else '' }}</textarea>
+    </label>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">{% if record %}Save Changes{% else %}Add Record{% endif %}</button>
+      <a class="btn btn-ghost" href="{{ url_for('index') }}">Cancel</a>
+    </div>
+  </form>
+
+  {% if record %}
+    <div class="attachments-section">
+      <h2>Files &amp; Images</h2>
+      <p class="hint">Every file is encrypted before it is saved. Max 25 MB per file.</p>
+
+      <form class="upload-form" method="post" action="{{ url_for('upload_attachment', record_id=record.id) }}" enctype="multipart/form-data">
+        <input type="file" name="file" required />
+        <button type="submit" class="btn btn-primary">Upload</button>
+      </form>
+
+      {% if record.attachments %}
+        <ul class="attachment-list">
+          {% for a in record.attachments %}
+            <li>
+              <span class="att-name">{{ a.filename }}</span>
+              <span class="att-meta">{{ a.size_kb }} KB</span>
+              <a class="btn btn-small" href="{{ url_for('download_attachment', attachment_id=a.id) }}">Download</a>
+              <form method="post" action="{{ url_for('delete_attachment', attachment_id=a.id) }}" onsubmit="return confirm('Delete this file permanently?');">
+                <input type="hidden" name="record_id" value="{{ record.id }}" />
+                <button type="submit" class="btn btn-small btn-danger">Delete</button>
+              </form>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="hint">No files attached yet.</p>
+      {% endif %}
+    </div>
+  {% else %}
+    <p class="hint">Save this record first, then you can attach files or images to it.</p>
+  {% endif %}
+{% endblock %}

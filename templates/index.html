@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Records - Personal Database{% endblock %}
+{% block content %}
+  <div class="page-header">
+    <h1>Your Records</h1>
+    <a class="btn btn-primary" href="{{ url_for('add') }}">+ Add Record</a>
+  </div>
+
+  <form class="filter-bar" method="get" action="{{ url_for('index') }}">
+    <input type="text" name="q" placeholder="Search name, email, phone, notes..." value="{{ query }}" />
+    <select name="category">
+      <option value="">All categories</option>
+      {% for c in categories %}
+        <option value="{{ c }}" {% if c == category_filter %}selected{% endif %}>{{ c }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn">Filter</button>
+    {% if query or category_filter %}
+      <a class="btn btn-ghost" href="{{ url_for('index') }}">Clear</a>
+    {% endif %}
+  </form>
+
+  {% if records %}
+    <div class="card-grid">
+      {% for r in records %}
+        <div class="card">
+          <div class="card-top">
+            <span class="badge">{{ r.category }}</span>
+            <span class="card-date">Updated {{ r.updated_at[:10] }}</span>
+          </div>
+          <h3>{{ r.name }}</h3>
+          {% if r.attachment_count %}
+            <p class="field"><strong>Files:</strong> {{ r.attachment_count }} attached</p>
+          {% endif %}
+          {% if r.email %}<p class="field"><strong>Email:</strong> {{ r.email }}</p>{% endif %}
+          {% if r.phone %}<p class="field"><strong>Phone:</strong> {{ r.phone }}</p>{% endif %}
+          {% if r.notes %}<p class="field notes">{{ r.notes }}</p>{% endif %}
+          <div class="card-actions">
+            <a class="btn btn-small" href="{{ url_for('edit', record_id=r.id) }}">Edit</a>
+            <form method="post" action="{{ url_for('delete', record_id=r.id) }}" onsubmit="return confirm('Delete this record permanently?');">
+              <button type="submit" class="btn btn-small btn-danger">Delete</button>
+            </form>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <p>No records found. Everything you store here is encrypted before it touches the database.</p>
+      <a class="btn btn-primary" href="{{ url_for('add') }}">Add your first record</a>
+    </div>
+  {% endif %}
+{% endblock %}

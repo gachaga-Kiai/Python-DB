@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Backups - Personal Database{% endblock %}
+{% block content %}
+  <div class="page-header">
+    <h1>Backups</h1>
+    <form method="post" action="{{ url_for('backups_create') }}">
+      <button type="submit" class="btn btn-primary">Create Backup Now</button>
+    </form>
+  </div>
+
+  <p class="hint">A backup of the encrypted database file is created automatically every 24 hours while the app is running, and the 10 most recent copies are kept.</p>
+
+  {% if backups %}
+    <table class="backup-table">
+      <thead>
+        <tr><th>File</th><th>Created</th><th>Size</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for b in backups %}
+          <tr>
+            <td>{{ b.name }}</td>
+            <td>{{ b.created }}</td>
+            <td>{{ b.size_kb }} KB</td>
+            <td><a class="btn btn-small" href="{{ url_for('backups_download', name=b.name) }}">Download</a></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div class="empty-state">
+      <p>No backups yet.</p>
+    </div>
+  {% endif %}
+{% endblock %}
